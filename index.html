@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1A1A2E">
+<title>LifeLike</title>
+<meta property="og:title" content="LifeLike">
+<meta property="og:description" content="Recomendaciones que aprenden de ti.">
+<meta property="og:image" content="https://lifelike-app.github.io/logo.png">
+<link rel="icon" href="logo.png">
+<style>
+  :root { --fondo: #1A1A2E; --indigo: #6B8CFF; --tenue: rgba(255, 255, 255, .58); }
+  html, body { margin: 0; height: 100%; background: var(--fondo); color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif; }
+  main { min-height: 100%; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; padding: 24px 16px; box-sizing: border-box; text-align: center; }
+  img { height: 56px; margin-bottom: 18px; }
+  h1 { color: var(--indigo); font-size: 34px; margin: 0 0 8px; }
+  p { color: var(--tenue); font-size: 16px; margin: 0 0 6px; }
+</style>
+</head>
+<body>
+<main>
+  <img src="logo.png" alt="">
+  <h1>LifeLike</h1>
+  <p id="lema">Recomendaciones que aprenden de ti.</p>
+  <p id="pronto">Muy pronto en la App Store.</p>
+</main>
+<script>
+  if (!(navigator.language || 'es').toLowerCase().startsWith('es')) {
+    document.documentElement.lang = 'en';
+    document.getElementById('lema').textContent = 'Recommendations that learn from you.';
+    document.getElementById('pronto').textContent = 'Coming soon to the App Store.';
+  }
+</script>
+</body>
+</html>

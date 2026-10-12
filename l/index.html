@@ -1,0 +1,224 @@
+<!doctype html>
+<!--
+  Página del botón "Bajar esta lista en LifeLike" del PDF de Mis Lugares.
+  Se publica en https://lifelike-app.github.io/l/ (ver ../README.md).
+
+  La lista viaja en el fragmento del link (#…): gzip + base64url, mismo formato
+  que ListaCompartidaService.codificar en la app. El navegador NO manda el
+  fragmento a ningún servidor, así que esta página la lee aquí mismo y nadie
+  más la ve. Todo se pinta con textContent: el link lo puede armar cualquiera.
+-->
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<meta name="theme-color" content="#1A1A2E">
+<title>LifeLike · Lista compartida</title>
+<meta property="og:title" content="Una lista de LifeLike">
+<meta property="og:description" content="Recomendaciones que aprenden de ti.">
+<meta property="og:image" content="https://lifelike-app.github.io/logo.png">
+<link rel="icon" href="../logo.png">
+<style>
+  :root {
+    --fondo: #1A1A2E;
+    --tarjeta: #22223A;
+    --indigo: #6B8CFF;
+    --coral: #FF5C87;
+    --coral-claro: #FF7FA3;
+    --texto: #FFFFFF;
+    --tenue: rgba(255, 255, 255, .58);
+    --mas-tenue: rgba(255, 255, 255, .45);
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    background: var(--fondo);
+    color: var(--texto);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    -webkit-text-size-adjust: 100%;
+  }
+  main {
+    max-width: 520px;
+    margin: 0 auto;
+    padding: calc(24px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
+  }
+  .logo { display: block; height: 40px; margin: 4px auto 28px; }
+  h1 { color: var(--indigo); font-size: 26px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -.3px; }
+  h2 { color: var(--coral); font-size: 20px; line-height: 1.25; margin: 0 0 8px; }
+  .conteo { color: var(--tenue); font-size: 14px; margin: 0 0 18px; }
+  ul {
+    list-style: none;
+    margin: 0 0 24px;
+    padding: 10px 16px;
+    background: var(--tarjeta);
+    border-radius: 18px;
+  }
+  li { display: flex; gap: 10px; padding: 7px 0; font-size: 15px; font-weight: 600; line-height: 1.3; }
+  li + li { border-top: 1px solid rgba(255, 255, 255, .06); }
+  li .e { width: 24px; flex: none; text-align: center; }
+  li .n { min-width: 0; overflow-wrap: anywhere; }
+  li small { display: block; color: var(--mas-tenue); font-weight: 400; font-size: 13px; margin-top: 2px; }
+  /* El botón se queda al pie mientras recorres la lista: con 20 lugares
+     quedaba a tres pantallas de distancia. */
+  .accion {
+    position: sticky;
+    bottom: 0;
+    margin: 0 -16px;
+    padding: 18px 16px calc(14px + env(safe-area-inset-bottom));
+    background: linear-gradient(rgba(26, 26, 46, 0), var(--fondo) 22px);
+  }
+  .accion .nota { margin-top: 10px; }
+  .boton {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    height: 54px; border-radius: 27px;
+    background: linear-gradient(90deg, var(--coral), var(--coral-claro));
+    color: #fff; font-size: 17px; font-weight: 700; text-decoration: none;
+  }
+  .boton:active { opacity: .85; }
+  .boton svg { width: 22px; height: 22px; fill: currentColor; flex: none; }
+  .nota { color: var(--tenue); font-size: 13px; text-align: center; margin: 16px 0 0; line-height: 1.45; }
+  .privada { color: var(--mas-tenue); font-size: 12px; text-align: center; margin: 22px 0 0; line-height: 1.45; }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="../logo.png" alt="LifeLike">
+
+  <h1 id="kicker">Te compartieron una lista</h1>
+  <h2 id="titulo" hidden></h2>
+  <p class="conteo" id="conteo" hidden></p>
+  <ul id="items" hidden></ul>
+
+  <div class="accion">
+    <a class="boton" id="abrir" href="#">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
+      <span id="abrir-texto">Abrir en LifeLike</span>
+    </a>
+    <p class="nota" id="nota">Si tienes LifeLike en tu teléfono, la lista se guarda en tus Mis Lugares.</p>
+  </div>
+  <p class="nota" id="sin-app">¿Aún no tienes LifeLike? Muy pronto en la App Store.</p>
+  <p class="privada" id="privada">Esta lista viaja dentro del link: no se guarda en ningún servidor.</p>
+</main>
+
+<script>
+// Otro link a esta misma página en la misma pestaña sólo cambia el # y el
+// navegador NO recarga: el botón seguiría abriendo la lista anterior.
+window.addEventListener('hashchange', function () { location.reload(); });
+(function () {
+  var es = (navigator.language || 'es').toLowerCase().indexOf('es') === 0;
+  var T = es ? {
+    generico: 'Te compartieron una lista',
+    recomienda: function (a) { return a + ' te recomienda'; },
+    abrir: 'Abrir en LifeLike',
+    nota: 'Si tienes LifeLike en tu teléfono, la lista se guarda en tus Mis Lugares.',
+    sinApp: '¿Aún no tienes LifeLike? Muy pronto en la App Store.',
+    privada: 'Esta lista viaja dentro del link: no se guarda en ningún servidor.',
+    vacia: 'Este link no trae ninguna lista.',
+    lugar: ['lugar', 'lugares'], libro: ['libro', 'libros'],
+    peli: ['película o serie', 'películas y series']
+  } : {
+    generico: 'Someone shared a list',
+    recomienda: function (a) { return a + ' recommends'; },
+    abrir: 'Open in LifeLike',
+    nota: 'If you have LifeLike on your phone, the list goes to your My Places.',
+    sinApp: "Don't have LifeLike yet? Coming soon to the App Store.",
+    privada: 'This list travels inside the link: it is not stored on any server.',
+    vacia: "This link doesn't carry a list.",
+    lugar: ['place', 'places'], libro: ['book', 'books'],
+    peli: ['movie or show', 'movies & shows']
+  };
+  var $ = function (id) { return document.getElementById(id); };
+  document.documentElement.lang = es ? 'es' : 'en';
+  $('kicker').textContent = T.generico;
+  $('abrir-texto').textContent = T.abrir;
+  $('nota').textContent = T.nota;
+  $('sin-app').textContent = T.sinApp;
+  $('privada').textContent = T.privada;
+
+  var datos = location.hash.slice(1);
+  if (!/^[A-Za-z0-9_-]+$/.test(datos)) {
+    $('kicker').textContent = T.vacia;
+    $('abrir').hidden = true;
+    $('nota').hidden = true;
+    $('privada').hidden = true;
+    return;
+  }
+  // La app lee exactamente lo mismo que trae este link.
+  $('abrir').href = 'lifelike://lista#' + datos;
+
+  // Leer la lista sólo para enseñarla. Si este navegador no sabe (iOS < 16.4)
+  // o el link viene roto, el botón funciona igual: la app hace su propia
+  // lectura.
+  if (typeof DecompressionStream === 'undefined') return;
+  var b64 = datos.replace(/-/g, '+').replace(/_/g, '/');
+  b64 += '===='.slice(0, (4 - b64.length % 4) % 4);
+  var bytes;
+  try {
+    var bin = atob(b64);
+    bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+  } catch (e) { return; }
+  var flujo = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+  new Response(flujo).text().then(function (txt) {
+    var lista = JSON.parse(txt);
+    if (!lista || lista.v !== 1 || !Array.isArray(lista.i)) return;
+    var items = lista.i.filter(function (it) { return it && typeof it.n === 'string' && it.n; });
+    if (!items.length) return;
+
+    var autor = typeof lista.a === 'string' ? lista.a.trim() : '';
+    if (autor) $('kicker').textContent = T.recomienda(autor);
+    var titulo = typeof lista.t === 'string' ? lista.t.trim() : '';
+    if (titulo) {
+      $('titulo').textContent = titulo;
+      $('titulo').hidden = false;
+      document.title = 'LifeLike · ' + titulo;
+    }
+
+    var n = { lugar: 0, libro: 0, peli: 0 };
+    items.forEach(function (it) {
+      if (it.t === 'libro') n.libro++;
+      else if (it.t === 'pelicula_o_serie') n.peli++;
+      else n.lugar++;
+    });
+    var partes = [];
+    ['lugar', 'libro', 'peli'].forEach(function (k) {
+      if (n[k]) partes.push(n[k] + ' ' + T[k][n[k] === 1 ? 0 : 1]);
+    });
+    $('conteo').textContent = partes.join(' · ');
+    $('conteo').hidden = false;
+
+    // La ciudad en cada renglón sólo si hay más de una: si todas son de la
+    // misma, el título ya la dice.
+    var ciudades = {};
+    items.forEach(function (it) {
+      if (typeof it.c === 'string' && it.c) ciudades[it.c.toLowerCase()] = 1;
+    });
+    var variasCiudades = Object.keys(ciudades).length > 1;
+    var ul = $('items');
+    items.slice(0, 200).forEach(function (it) {
+      var li = document.createElement('li');
+      var e = document.createElement('span');
+      e.className = 'e';
+      e.textContent = typeof it.e === 'string' && it.e ? it.e : '📌';
+      var nombre = document.createElement('span');
+      nombre.className = 'n';
+      nombre.textContent = it.n;
+      var obra = it.t === 'libro' || it.t === 'pelicula_o_serie';
+      var det = obra ? it.x : (variasCiudades ? it.c : '');
+      if (typeof det === 'string' && det) {
+        var s = document.createElement('small');
+        s.textContent = det;
+        nombre.appendChild(s);
+      }
+      li.appendChild(e);
+      li.appendChild(nombre);
+      ul.appendChild(li);
+    });
+    ul.hidden = false;
+  }).catch(function () { /* link roto: queda la versión genérica */ });
+})();
+</script>
+</body>
+</html>
