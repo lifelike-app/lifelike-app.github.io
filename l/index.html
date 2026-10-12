@@ -1,12 +1,16 @@
 <!doctype html>
 <!--
-  Página del botón "Bajar esta lista en LifeLike" del PDF de Mis Lugares.
+  Página del botón "Abrir en LifeLike" del PDF de Mis Lugares.
   Se publica en https://lifelike-app.github.io/l/ (ver ../README.md).
 
-  La lista viaja en el fragmento del link (#…): gzip + base64url, mismo formato
-  que ListaCompartidaService.codificar en la app. El navegador NO manda el
-  fragmento a ningún servidor, así que esta página la lee aquí mismo y nadie
-  más la ve. Todo se pinta con textContent: el link lo puede armar cualquiera.
+  Dos formatos de link (ListaCompartidaService en la app):
+  · CORTO, #k7Qx2mPa (desde 2026-10-11): la lista vive en Supabase. Esta página
+    NO la lee — para eso habría que publicar la llave de Supabase en un repo
+    público —, sólo enseña la versión genérica y le pasa el código a la app.
+  · LARGO, #H4sI…: la lista viaja dentro del link (gzip + base64url). El
+    navegador no manda el fragmento a ningún servidor; la página la lee aquí
+    mismo. Son los PDFs anteriores y los exportados sin red.
+  Todo se pinta con textContent: el link lo puede armar cualquiera.
 -->
 <html lang="es">
 <head>
@@ -147,6 +151,14 @@ window.addEventListener('hashchange', function () { location.reload(); });
   }
   // La app lee exactamente lo mismo que trae este link.
   $('abrir').href = 'lifelike://lista#' + datos;
+
+  // Link corto: la lista está en el servidor y la baja la app. Aquí sólo la
+  // versión genérica — y sin "no se guarda en ningún servidor", que para
+  // estos links ya no es cierto.
+  if (/^[A-Za-z0-9]{8}$/.test(datos)) {
+    $('privada').hidden = true;
+    return;
+  }
 
   // Leer la lista sólo para enseñarla. Si este navegador no sabe (iOS < 16.4)
   // o el link viene roto, el botón funciona igual: la app hace su propia

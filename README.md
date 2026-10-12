@@ -4,7 +4,7 @@ Se publica tal cual en **https://lifelike-app.github.io** (repo
 `lifelike-app/lifelike-app.github.io`, organización gratis de GitHub).
 Este folder es la fuente; el repo de la organización es sólo el destino.
 
-- `l/index.html` — la página de "Bajar esta lista en LifeLike". Lee la lista
+- `l/index.html` — la página del botón "Abrir en LifeLike" del PDF. Lee la lista
   del fragmento del link (`#…`, nunca llega a ningún servidor), la enseña y
   abre la app con `lifelike://lista#…`. Formato: `ListaCompartidaService`
   (`frontend/lib/services/lista_compartida_service.dart`).
