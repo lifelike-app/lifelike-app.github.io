@@ -48,7 +48,7 @@
     padding: calc(24px + env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
   }
   .logo { display: block; height: 40px; margin: 4px auto 28px; }
-  h1 { color: var(--indigo); font-size: 26px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -.3px; }
+  h1 { color: var(--indigo); font-size: 30px; line-height: 1.2; margin: 0 0 6px; letter-spacing: -.3px; }
   h2 { color: var(--coral); font-size: 20px; line-height: 1.25; margin: 0 0 8px; }
   .conteo { color: var(--tenue); font-size: 14px; margin: 0 0 18px; }
   ul {
@@ -72,7 +72,7 @@
     padding: 18px 16px calc(14px + env(safe-area-inset-bottom));
     background: linear-gradient(rgba(26, 26, 46, 0), var(--fondo) 22px);
   }
-  .accion .nota { margin-top: 10px; }
+  .accion .nota { margin-top: 12px; }
   .boton {
     display: flex; align-items: center; justify-content: center; gap: 8px;
     height: 54px; border-radius: 27px;
@@ -81,16 +81,20 @@
   }
   .boton:active { opacity: .85; }
   .boton svg { width: 22px; height: 22px; fill: currentColor; flex: none; }
-  .nota { color: var(--tenue); font-size: 13px; text-align: center; margin: 16px 0 0; line-height: 1.45; }
-  .privada { color: var(--mas-tenue); font-size: 12px; text-align: center; margin: 22px 0 0; line-height: 1.45; }
+  /* Poco texto y grande (pedido del usuario, 2026-10-12): nadie lee lo largo. */
+  .nota { color: rgba(255, 255, 255, .78); font-size: 19px; font-weight: 600; text-align: center; margin: 16px 0 0; line-height: 1.35; }
+  .sin-app { color: var(--tenue); font-size: 16px; text-align: center; margin: 28px 0 0; line-height: 1.4; }
+  /* Sin lista que enseñar (link corto): todo al centro de la pantalla. */
+  body.sola main { min-height: 100vh; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; }
+  body.sola h1 { text-align: center; }
   [hidden] { display: none !important; }
 </style>
 </head>
-<body>
+<body class="sola">
 <main>
   <img class="logo" src="../logo.png" alt="LifeLike">
 
-  <h1 id="kicker">Te compartieron una lista</h1>
+  <h1 id="kicker">Lista compartida</h1>
   <h2 id="titulo" hidden></h2>
   <p class="conteo" id="conteo" hidden></p>
   <ul id="items" hidden></ul>
@@ -100,10 +104,9 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z"/></svg>
       <span id="abrir-texto">Abrir en LifeLike</span>
     </a>
-    <p class="nota" id="nota">Si tienes LifeLike en tu teléfono, la lista se guarda en tus Mis Lugares.</p>
+    <p class="nota" id="nota">Se guarda en tus Mis Lugares</p>
   </div>
-  <p class="nota" id="sin-app">¿Aún no tienes LifeLike? Muy pronto en la App Store.</p>
-  <p class="privada" id="privada">Esta lista viaja dentro del link: no se guarda en ningún servidor.</p>
+  <p class="sin-app" id="sin-app">¿Sin LifeLike? Muy pronto en App Store</p>
 </main>
 
 <script>
@@ -113,22 +116,20 @@ window.addEventListener('hashchange', function () { location.reload(); });
 (function () {
   var es = (navigator.language || 'es').toLowerCase().indexOf('es') === 0;
   var T = es ? {
-    generico: 'Te compartieron una lista',
+    generico: 'Lista compartida',
     recomienda: function (a) { return a + ' te recomienda'; },
     abrir: 'Abrir en LifeLike',
-    nota: 'Si tienes LifeLike en tu teléfono, la lista se guarda en tus Mis Lugares.',
-    sinApp: '¿Aún no tienes LifeLike? Muy pronto en la App Store.',
-    privada: 'Esta lista viaja dentro del link: no se guarda en ningún servidor.',
+    nota: 'Se guarda en tus Mis Lugares',
+    sinApp: '¿Sin LifeLike? Muy pronto en App Store',
     vacia: 'Este link no trae ninguna lista.',
     lugar: ['lugar', 'lugares'], libro: ['libro', 'libros'],
     peli: ['película o serie', 'películas y series']
   } : {
-    generico: 'Someone shared a list',
+    generico: 'Shared list',
     recomienda: function (a) { return a + ' recommends'; },
     abrir: 'Open in LifeLike',
-    nota: 'If you have LifeLike on your phone, the list goes to your My Places.',
-    sinApp: "Don't have LifeLike yet? Coming soon to the App Store.",
-    privada: 'This list travels inside the link: it is not stored on any server.',
+    nota: 'Saves to your My Places',
+    sinApp: 'No LifeLike? Coming soon to the App Store',
     vacia: "This link doesn't carry a list.",
     lugar: ['place', 'places'], libro: ['book', 'books'],
     peli: ['movie or show', 'movies & shows']
@@ -139,26 +140,20 @@ window.addEventListener('hashchange', function () { location.reload(); });
   $('abrir-texto').textContent = T.abrir;
   $('nota').textContent = T.nota;
   $('sin-app').textContent = T.sinApp;
-  $('privada').textContent = T.privada;
 
   var datos = location.hash.slice(1);
   if (!/^[A-Za-z0-9_-]+$/.test(datos)) {
     $('kicker').textContent = T.vacia;
     $('abrir').hidden = true;
     $('nota').hidden = true;
-    $('privada').hidden = true;
     return;
   }
   // La app lee exactamente lo mismo que trae este link.
   $('abrir').href = 'lifelike://lista#' + datos;
 
   // Link corto: la lista está en el servidor y la baja la app. Aquí sólo la
-  // versión genérica — y sin "no se guarda en ningún servidor", que para
-  // estos links ya no es cierto.
-  if (/^[A-Za-z0-9]{8}$/.test(datos)) {
-    $('privada').hidden = true;
-    return;
-  }
+  // versión genérica.
+  if (/^[A-Za-z0-9]{8}$/.test(datos)) return;
 
   // Leer la lista sólo para enseñarla. Si este navegador no sabe (iOS < 16.4)
   // o el link viene roto, el botón funciona igual: la app hace su propia
@@ -229,6 +224,7 @@ window.addEventListener('hashchange', function () { location.reload(); });
       ul.appendChild(li);
     });
     ul.hidden = false;
+    document.body.classList.remove('sola'); // con lista, arriba como siempre
   }).catch(function () { /* link roto: queda la versión genérica */ });
 })();
 </script>
